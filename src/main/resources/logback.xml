@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Console appender with ANSI colours -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--
+              Colour rules:
+                ERROR -> red
+                WARN  -> yellow
+                INFO  -> green
+                DEBUG -> blue
+                TRACE -> cyan
+            -->
+            <pattern>
+                %d{HH:mm:ss.SSS} %highlight(%-5level){ERROR=red,WARN=yellow,INFO=green,DEBUG=blue,TRACE=cyan} %magenta([%thread]) %cyan(%class{0}) - %msg%n%ex
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- Default level -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

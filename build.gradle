@@ -1,0 +1,39 @@
+plugins {
+    id 'application'
+    id 'java'
+}
+
+group = 'com.mogrul.videocompressor'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("ch.qos.logback:logback-classic:1.5.24")
+    implementation("org.xerial:sqlite-jdbc:3.51.1.0")
+}
+
+application {
+    mainClass = "com.mogrul.videocompressor.VideoCompressor"
+    applicationDefaultJvmArgs = [
+            "--enable-native-access=ALL-UNNAMED"
+    ]
+}
+
+tasks.jar {
+    archiveClassifier.set("")
+    manifest {
+        attributes(
+                "Main-Class": application.mainClass.get()
+        )
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+}
