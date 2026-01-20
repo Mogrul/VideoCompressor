@@ -17,3 +17,7 @@ The program supports a variety of flags.
 1. Download the appropriate file from the releases section.
 2. Download ffmpeg.exe, ffprobe.exe into a desired location from: https://www.gyan.dev/ffmpeg/builds/
 3. Run the file using `java -jar {{name}}` followed by the appropriate arguments
+
+<p style = "text-align:center;">
+    <img src = "https://github.com/Mogrul/VideoCompressor/blob/master/images/banner.png" alt = "banner">
+</p>
