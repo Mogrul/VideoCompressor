@@ -1,4 +1,4 @@
-package com.mogrul.videocompressor;
+package com.mogrul.videocompressor.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

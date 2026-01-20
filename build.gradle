@@ -37,3 +37,13 @@ tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
 }
+
+run {
+    args "--input", "Y:\\Videos\\Recordings",
+    "--output", "Y:\\Videos\\Recordings-Compressed",
+    "--ffmpeg", "B:\\Documents\\Coding\\VideoCompressor\\ffmpeg\\ffmpeg.exe",
+    "--ffprobe", "B:\\Documents\\Coding\\VideoCompressor\\ffmpeg\\ffprobe.exe",
+    "--fps", 25,
+    "--delete-source", true,
+    "--workers", 4
+}

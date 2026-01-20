@@ -1,5 +1,6 @@
-package com.mogrul.videocompressor;
+package com.mogrul.videocompressor.ffmpeg;
 
+import com.mogrul.videocompressor.util.ToolRunner;
 import com.mogrul.videocompressor.inter.Transcoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

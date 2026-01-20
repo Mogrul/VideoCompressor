@@ -1,4 +1,4 @@
-package com.mogrul.videocompressor;
+package com.mogrul.videocompressor.util;
 
 import com.mogrul.videocompressor.record.FileStamp;
 

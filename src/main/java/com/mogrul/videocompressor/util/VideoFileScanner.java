@@ -1,4 +1,4 @@
-package com.mogrul.videocompressor;
+package com.mogrul.videocompressor.util;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;

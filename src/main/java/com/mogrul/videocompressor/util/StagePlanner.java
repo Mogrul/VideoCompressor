@@ -1,4 +1,4 @@
-package com.mogrul.videocompressor;
+package com.mogrul.videocompressor.util;
 
 import java.nio.file.Path;
 

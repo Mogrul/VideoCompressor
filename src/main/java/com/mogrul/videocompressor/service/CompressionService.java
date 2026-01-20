@@ -1,10 +1,11 @@
-package com.mogrul.videocompressor;
+package com.mogrul.videocompressor.service;
 
 import com.mogrul.videocompressor.inter.StampStore;
 import com.mogrul.videocompressor.inter.Transcoder;
 import com.mogrul.videocompressor.inter.Validator;
 import com.mogrul.videocompressor.record.FileStamp;
 import com.mogrul.videocompressor.record.JobConfig;
+import com.mogrul.videocompressor.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
