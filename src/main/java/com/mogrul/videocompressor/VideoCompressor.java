@@ -8,7 +8,6 @@ import com.mogrul.videocompressor.service.CompressionService;
 import com.mogrul.videocompressor.util.*;
 
 import java.nio.file.Path;
-import java.util.Map;
 
 public class VideoCompressor {
     private static final Path localStage = Path.of("temp");

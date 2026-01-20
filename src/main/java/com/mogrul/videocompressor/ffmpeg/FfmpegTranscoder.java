@@ -1,9 +1,10 @@
 package com.mogrul.videocompressor.ffmpeg;
 
-import com.mogrul.videocompressor.util.ToolRunner;
 import com.mogrul.videocompressor.inter.Transcoder;
+import com.mogrul.videocompressor.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;

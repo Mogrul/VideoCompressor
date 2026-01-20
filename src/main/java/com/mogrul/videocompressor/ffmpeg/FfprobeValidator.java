@@ -1,7 +1,7 @@
 package com.mogrul.videocompressor.ffmpeg;
 
-import com.mogrul.videocompressor.util.ToolRunner;
 import com.mogrul.videocompressor.inter.Validator;
+import com.mogrul.videocompressor.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
