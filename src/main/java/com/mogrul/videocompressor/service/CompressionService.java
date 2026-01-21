@@ -125,8 +125,6 @@ public class CompressionService {
                 );
 
                 stager.uploadAtomic(output, remoteTmpOutput, remoteOutput);
-            } else {
-                // Cleanup local after success.
                 stager.cleanup(input, output);
             }
 
