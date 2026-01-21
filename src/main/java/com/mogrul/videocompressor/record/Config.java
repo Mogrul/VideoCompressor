@@ -2,17 +2,18 @@ package com.mogrul.videocompressor.record;
 
 import java.nio.file.Path;
 
-public record JobConfig(
+public record Config(
         Path inputRoot,
         Path outputRoot,
         Path localStageRoot,
         Path ffmpegPath,
         Path ffprobePath,
-        int targetFps,
-        int workers,
         Path dbPath,
-        boolean deleteSourceAfterSuccess,
-        boolean downloadFromRemote,
+        int fps,
+        int workers,
         int outputHeight,
-        int outputWidth
-) {}
+        int outputWidth,
+        boolean deleteSourceAfterSuccess,
+        boolean downloadFromRemote
+) {
+}

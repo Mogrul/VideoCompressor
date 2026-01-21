@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.mogrul.videocompressor'
-version = '1.0-SNAPSHOT'
+version = '1.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -43,7 +43,6 @@ run {
     "--output", "Y:\\Videos\\Recordings-Compressed",
     "--ffmpeg", "B:\\Documents\\Coding\\VideoCompressor\\ffmpeg\\ffmpeg.exe",
     "--ffprobe", "B:\\Documents\\Coding\\VideoCompressor\\ffmpeg\\ffprobe.exe",
-    "--fps", 25,
     "--delete-source", true,
-    "--workers", 4
+    "--workers", 2
 }

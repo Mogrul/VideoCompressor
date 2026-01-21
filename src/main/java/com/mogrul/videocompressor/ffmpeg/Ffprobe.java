@@ -1,6 +1,6 @@
 package com.mogrul.videocompressor.ffmpeg;
 
-import com.mogrul.videocompressor.inter.Validator;
+import com.mogrul.videocompressor.enu.VideoCodec;
 import com.mogrul.videocompressor.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,18 +9,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public final class FfprobeValidator implements Validator {
-    private final Logger logger = LoggerFactory.getLogger(FfprobeValidator.class);
+public class Ffprobe {
+    private final Logger logger = LoggerFactory.getLogger(Ffprobe.class);
     private final Path ffprobePath;
     private final ToolRunner runner;
 
-    public FfprobeValidator(Path ffprobePath, ToolRunner runner) {
+    public Ffprobe(Path ffprobePath, ToolRunner runner) {
         this.ffprobePath = ffprobePath;
         this.runner = runner;
     }
 
-    @Override
-    public void validate(Path outputFile) throws Exception {
+    public void validate(Path outputFile) throws Exception{
         if (!Files.exists(outputFile)) {
             throw new ValidationException("Output file does not exist: " + outputFile);
         }
@@ -66,14 +65,35 @@ public final class FfprobeValidator implements Validator {
         }
     }
 
+    public VideoCodec getVideoCodec(Path videoFile) throws Exception {
+        List<String> cmd = List.of(
+                ffprobePath.toString(),
+                "-v", "error",
+                "-select_streams", "v:0",
+                "-show_entries", "stream=codec_name",
+                "-of", "default=nw=1:nk=1",
+                videoFile.toString()
+        );
+
+        ToolRunner.ToolResult result = runner.run(cmd);
+        if (result.exitCode() != 0) {
+            return VideoCodec.OTHER;
+        }
+        String codecName = result.outputTail().trim();
+
+        VideoCodec videoCodec = VideoCodec.fromCodecName(codecName);
+        logger.info("[CODEC] Found codec {} for {}", videoCodec.name(), videoFile);
+
+        return videoCodec;
+    }
+
     private static double parseFirstDouble(String text) {
         String s = text.trim();
-        // ffprobe often prints just the number, but we’ll be forgiving
         String firstLine = s.contains("\n") ? s.substring(0, s.indexOf('\n')).trim() : s;
         return Double.parseDouble(firstLine);
     }
 
-    public static final class ValidationException extends Exception {
+    private static final class ValidationException extends Exception {
         public ValidationException(String message) { super(message); }
     }
 }

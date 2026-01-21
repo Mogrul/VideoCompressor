@@ -1,8 +1,9 @@
 package com.mogrul.videocompressor.service;
 
+import com.mogrul.videocompressor.ffmpeg.FfmpegTranscoder;
+import com.mogrul.videocompressor.ffmpeg.Ffprobe;
 import com.mogrul.videocompressor.inter.StampStore;
-import com.mogrul.videocompressor.inter.Transcoder;
-import com.mogrul.videocompressor.inter.Validator;
+import com.mogrul.videocompressor.record.Config;
 import com.mogrul.videocompressor.record.FileStamp;
 import com.mogrul.videocompressor.record.JobConfig;
 import com.mogrul.videocompressor.util.*;
@@ -21,30 +22,30 @@ import java.util.concurrent.TimeUnit;
 
 public class CompressionService {
     private final Logger logger = LoggerFactory.getLogger(CompressionService.class);
-    private final JobConfig config;
+    private final Config config;
     private final VideoFileScanner scanner;
     private final StampCalculator stamper;
     private final StampStore store;
-    private final Transcoder transcoder;
-    private final Validator validator;
+    private final FfmpegTranscoder transcoder;
+    private final Ffprobe ffprobe;
 
     private final StagePlanner planner;
     private final FileStager stager;
 
     public CompressionService(
-            JobConfig config,
+            Config config,
             VideoFileScanner scanner,
             StampCalculator stamper,
             StampStore store,
-            Transcoder transcoder,
-            Validator validator
+            FfmpegTranscoder transcoder,
+            Ffprobe ffprobe
     ) {
         this.config = config;
         this.scanner = scanner;
         this.stamper = stamper;
         this.store = store;
         this.transcoder = transcoder;
-        this.validator = validator;
+        this.ffprobe = ffprobe;
 
         this.planner = new StagePlanner(config.inputRoot(), config.outputRoot(), config.localStageRoot());
         this.stager = new FileStager();
@@ -90,40 +91,56 @@ public class CompressionService {
         store.markRunning(sourceKey, stamp);
 
         try {
-            // 1) download remote -> local
-            stager.download(remoteInput, paths.localInput());
-            Files.createDirectories(paths.localTmpOutput().getParent());
+            Path input;
+            Path outputTmp;
+            Path output;
+            Path remoteTmpOutput = null;
+            Path remoteOutput = null;
 
-            // 2) transcode locally (fast disk, GPU happier)
-            transcoder.transcodeTo720p(paths.localInput(), paths.localTmpOutput());
+            if (config.downloadFromRemote()) {
+                input = paths.localInput();
+                outputTmp = paths.localTmpOutput();
+                output = paths.localFinalOutput();
+                remoteOutput = paths.remoteFinalOut();
+                remoteTmpOutput = paths.remoteTmpOut();
 
-            // 3) validate local output
-            validator.validate(paths.localTmpOutput());
+                // Downloads locally and transcode from local directory
+                stager.download(remoteInput, input);
+            } else {
+                input = remoteInput;
+                outputTmp = paths.remoteTmpOut();
+                output = paths.remoteFinalOut();
+            }
 
-            // 4) move local tmp -> local final (optional neatness)
-            Files.createDirectories(paths.localFinalOutput().getParent());
-            Files.move(paths.localTmpOutput(), paths.localFinalOutput(),
-                    StandardCopyOption.REPLACE_EXISTING);
+            Files.createDirectories(outputTmp.getParent());
+            transcoder.transcode(input, outputTmp, ffprobe);
+            Files.createDirectories(output.getParent());
+            Files.move(outputTmp, output,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
 
-            // 5) upload back to remote atomically via remote tmp then rename
-            stager.uploadAtomic(paths.localFinalOutput(), paths.remoteTmpOut(), paths.remoteFinalOut());
+            if (config.downloadFromRemote()) {
+                if (remoteTmpOutput == null || remoteOutput == null) throw new IllegalArgumentException(
+                        "remoteTmpOutput or remoteOutput is null"
+                );
 
-            store.markDone(sourceKey, stamp, paths.remoteFinalOut().toString());
+                stager.uploadAtomic(output, remoteTmpOutput, remoteOutput);
+            } else {
+                // Cleanup local after success.
+                stager.cleanup(input, output);
+            }
 
             if (config.deleteSourceAfterSuccess()) {
-                Files.deleteIfExists(remoteInput);
-                logger.info("[DELETE] {}", remoteInput);
+                stager.cleanup(remoteInput);
             }
+
+            store.markDone(sourceKey, stamp, paths.remoteFinalOut().toString());
 
             logger.info("[DONE] {} -> {}", remoteInput, paths.remoteFinalOut());
 
         } catch (Exception e) {
             store.markFailed(sourceKey, stamp, e.toString());
             throw e;
-        } finally {
-            // cleanup local staged files to save space
-            logger.info("[DELETE] {}", paths.localInput());
-            stager.cleanup(paths.localInput(), paths.localTmpOutput(), paths.localFinalOutput());
         }
     }
 }

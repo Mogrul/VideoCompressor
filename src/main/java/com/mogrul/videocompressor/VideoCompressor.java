@@ -1,8 +1,9 @@
 package com.mogrul.videocompressor;
 
 import com.mogrul.videocompressor.ffmpeg.FfmpegTranscoder;
-import com.mogrul.videocompressor.ffmpeg.FfprobeValidator;
-import com.mogrul.videocompressor.record.Arg;
+import com.mogrul.videocompressor.ffmpeg.Ffprobe;
+import com.mogrul.videocompressor.record.Arguments;
+import com.mogrul.videocompressor.record.Config;
 import com.mogrul.videocompressor.record.JobConfig;
 import com.mogrul.videocompressor.service.CompressionService;
 import com.mogrul.videocompressor.util.*;
@@ -14,23 +15,19 @@ public class VideoCompressor {
     private static final Path dbPath = Path.of("compressed.db");
 
     static void main(String[] args) throws Exception {
-        Args arguments = new Args(args);
-        Arg arg = arguments.arg;
-
-        JobConfig config = new JobConfig(
-                arg.inputRoot(), arg.outputRoot(), localStage, arg.ffmpegPath(), arg.ffprobePath(),
-                arg.targetFps(), arg.workers(), dbPath, arg.deleteSource()
-        );
+        ArgUtil.parse(args);
+        Config config = ConfigUtil.getConfig();
 
         VideoFileScanner fileScanner = new VideoFileScanner();
         StampCalculator stamper = new StampCalculator(64 * 1024);
         SQLiteStampStore store = new SQLiteStampStore(config.dbPath());
 
         ToolRunner runner = new ToolRunner();
-        FfmpegTranscoder transcoder = new FfmpegTranscoder(config.ffmpegPath(), config.targetFps(), runner);
-        FfprobeValidator validator = new FfprobeValidator(config.ffprobePath(), runner);
+        FfmpegTranscoder transcoder = new FfmpegTranscoder(config.ffmpegPath(), config.fps(), runner,
+                config.outputWidth(), config.outputHeight());
+        Ffprobe ffprobe = new Ffprobe(config.ffprobePath(), runner);
 
-        CompressionService service = new CompressionService(config, fileScanner, stamper, store, transcoder, validator);
+        CompressionService service = new CompressionService(config, fileScanner, stamper, store, transcoder, ffprobe);
 
         service.run();
     }
